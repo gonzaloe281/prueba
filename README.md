@@ -2,6 +2,8 @@
 
 Este script de Python permite escanear de forma automática todos los archivos `.jar` (mods) de tus instancias de Modrinth utilizando la API de VirusTotal. Está diseñado para funcionar con cuentas gratuitas, respetando los límites de velocidad de la API.
 
+---
+
 ## 🚀 Características
 
 - 🔍 **Detección de mods:** Encuentra automáticamente todas las instancias de Modrinth instaladas en tu PC y lista los archivos `.jar` dentro de cada una. No hace falta indicarle rutas manualmente más allá de la carpeta base configurada en `config.py`.
@@ -18,14 +20,74 @@ Este script de Python permite escanear de forma automática todos los archivos `
 
 - 💾 **Guardado progresivo:** Los resultados se guardan después de cada mod analizado, no al final. Si el programa se interrumpe a mitad de un escaneo, los resultados anteriores no se pierden y la próxima ejecución retoma desde donde quedó.
 
+---
+
 ## 📋 Requisitos Previos
 
-Antes de empezar, asegúrate de tener instalado:
+Si es la primera vez que trabajás con Python, seguí estos pasos antes de continuar. Si ya tenés todo instalado, podés saltarte directo a [Instalación](#instalación).
 
-- [Python 3.x](https://www.python.org/downloads/)
-- Una cuenta en [VirusTotal](https://www.virustotal.com/) para obtener tu API Key gratuita.
+### 🐍 1. Python
 
-## 🛠️ 1. Instalación
+Descargá e instalá Python desde la página oficial:
+
+👉 [https://www.python.org/downloads/](https://www.python.org/downloads/)
+
+> ⚠️ Durante la instalación, asegurate de tildar la opción **"Add Python to PATH"** antes de hacer clic en instalar. Sin esto, el comando `python` no va a funcionar en la terminal.
+
+Para verificar que quedó bien instalado, abrí una terminal y ejecutá:
+
+```
+python --version
+```
+
+Debería mostrarte algo como `Python 3.x.x`.
+
+---
+
+### 💻 2. Visual Studio Code (editor de código)
+
+VSCode es el editor recomendado para trabajar con este proyecto.
+
+👉 [https://code.visualstudio.com/](https://code.visualstudio.com/)
+
+Una vez instalado, abrí VSCode e instalá la extensión oficial de Python:
+
+- Presioná `Ctrl+Shift+X`
+- Buscá **Python** (de Microsoft) e instalala
+
+---
+
+### 🐙 3. Git
+
+Git es necesario para clonar este repositorio en tu PC.
+
+👉 [https://git-scm.com/downloads](https://git-scm.com/downloads)
+
+Durante la instalación podés dejar todas las opciones por defecto. Para verificar que quedó instalado:
+
+```
+git --version
+```
+
+---
+
+### 🔑 4. API Key de VirusTotal
+
+Necesitás una cuenta gratuita en VirusTotal para obtener tu clave de acceso a la API.
+
+👉 [https://www.virustotal.com/](https://www.virustotal.com/)
+
+Una vez registrado:
+
+1. Hacé clic en tu foto de perfil arriba a la derecha
+2. Seleccioná **API key**
+3. Copiá la clave — la vas a necesitar en el paso de configuración
+
+> ℹ️ El plan gratuito permite hasta **4 análisis por minuto**. El programa respeta este límite automáticamente.
+
+---
+
+## 🛠️ Instalación
 
 **A. Clonar el repositorio:**
 
@@ -34,67 +96,68 @@ gh repo clone gonzaloe281/prueba
 cd prueba
 ```
 
-**B.Instalar dependencias:**
-Este proyecto utiliza la librería oficial vt-py. Instálala usando pip:
+**B. Instalar dependencias:**
+
+Este proyecto utiliza la librería oficial `vt-py`. Instalala usando pip:
 
 ```
 pip install vt-py
 ```
 
-## ⚙️ 2. Configuración
+---
 
-Para que el script funcione, debes crear un archivo llamado config.py en la carpeta raíz del proyecto.
+## ⚙️ Configuración
 
-Crea el archivo config.py.
+Para que el script funcione necesitás crear un archivo llamado `config.py` en la carpeta raíz del proyecto.
 
-Copia y pega el siguiente código, reemplazando los valores con los tuyos:
+**1.** Creá el archivo `config.py`
 
-```
+**2.** Copiá y pegá el siguiente contenido, reemplazando los valores con los tuyos:
+
+```python
 # config.py - Tu configuración personal
 
 API_KEY = "TU_API_KEY_AQUI"
 
 # Ruta donde Modrinth guarda las instancias (ajusta según tu usuario)
-
 MODRINTH_PATH = r"C:\Users\TU_USUARIO\AppData\Roaming\ModrinthApp\profiles"
 ```
 
-⚠️ IMPORTANTE: Nunca compartas tu config.py ni lo subas a GitHub, ya que contiene tu API Key privada.
-El archivo .gitignore de este repo ya está configurado para ignorarlo.
+> ⚠️ **IMPORTANTE:** Nunca compartas tu `config.py` ni lo subas a GitHub, ya que contiene tu API Key privada. El archivo `.gitignore` de este repositorio ya está configurado para ignorarlo automáticamente.
 
-## 🚀 3. Uso
+---
 
-Ejecuta el script principal:
+## ▶️ Uso
+
+Ejecutá el script principal desde la terminal:
 
 ```
 python scanner.py
 ```
 
-El script te preguntará cuántos archivos deseas analizar en la sesión actual. Al finalizar, verás los detalles en el archivo generado resultados.json.
+El programa va a mostrar un menú interactivo donde podés elegir qué instancia y qué mods analizar. Al finalizar cada análisis, los resultados quedan guardados en `resultados.json`.
 
 ---
 
-📄 Licencia
+## 🔒 Seguridad adicional — `.gitignore`
 
-Este proyecto es de uso personal. Revisa los términos de servicio de la API de VirusTotal antes de realizar escaneos masivos.
+Para asegurarte de que nunca subas accidentalmente tu clave o tus resultados a GitHub, verificá que tu archivo `.gitignore` contenga estas líneas:
 
----
-
-### Pasos adicionales recomendados:
-
-**Crea un archivo `.gitignore`**: Para evitar que por error subas tu clave a GitHub algún día, crea un archivo llamado
-`.gitignore` (literalmente así, empieza con un punto) en la misma carpeta y escribe esto adentro:
-
-```text
- config.py
- resultados.json
- __pycache__/
- *.pyc
+```
+config.py
+resultados.json
+__pycache__/
+*.pyc
 ```
 
-Esto le dice a GitHub: "Ignora mi clave y mis resultados personales".
+Esto le indica a Git que ignore esos archivos en todos los commits.
 
 ---
 
-¿Te gustaría que agreguemos alguna sección más, como una tabla de cómo leer los resultados del JSON? Posiblemente en el futuro conmbine este codigo con DJango para hacerlo bonito,
-si descubro como tirar los resultados del JSON a un HTML en principio, y si puedo tambien que se ejecute todo desde un navegador...
+## 📄 Licencia
+
+Este proyecto es de uso personal. Revisá los términos de servicio de la API de VirusTotal antes de realizar escaneos masivos.
+
+---
+
+> 💡 **Nota del autor:** Posiblemente en el futuro este proyecto se integre con Django para visualizar los resultados desde el navegador, mostrando los datos del JSON en una interfaz web completa.
