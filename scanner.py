@@ -1,4 +1,4 @@
-# scanner.py - Escaneador de mods de Modrinth con VirusTotal
+# scanner.py - Escaneador de mods con VirusTotal y eliminación de amenazas
 import os
 import json
 import time
@@ -8,6 +8,7 @@ from config import API_KEY, MODRINTH_PATH
 
 def encontrar_archivos_mod(ruta_base):
     archivos = []
+    # os.walk recorre solo lo que está dentro de MODRINTH_PATH
     for carpeta_raiz, subcarpetas, archivos_en_carpeta in os.walk(ruta_base):
         if os.path.basename(carpeta_raiz) == "mods":
             for nombre_archivo in archivos_en_carpeta:
@@ -38,13 +39,14 @@ def analizar_archivo(cliente_vt, ruta_archivo):
                 return {
                     "instancia": instancia,
                     "archivo": nombre,
+                    "ruta_completa": ruta_archivo,
                     "veredicto": veredicto,
                     "detalles": dict(stats),
                     "estado": "OK"
                 }
             
-            if tiempo_espera > 120:
-                return {"instancia": instancia, "archivo": nombre, "error": "Tiempo de espera agotado", "estado": "ERROR"}
+            if tiempo_espera > 300:
+                return {"instancia": instancia, "archivo": nombre, "error": "Timeout", "estado": "ERROR"}
             
             print(f"    Esperando resultado... ({tiempo_espera}s)")
             time.sleep(15)
@@ -52,7 +54,6 @@ def analizar_archivo(cliente_vt, ruta_archivo):
 
     except vt.error.APIError as e:
         if "AlreadySubmittedError" in str(e):
-            print(f"    [AVISO] Saltando: {nombre} ya está siendo procesado por VT.")
             return {"instancia": instancia, "archivo": nombre, "error": "AlreadySubmittedError", "estado": "REINTENTO"}
         return {"instancia": instancia, "archivo": nombre, "error": str(e), "estado": "ERROR"}
     except Exception as e:
@@ -64,22 +65,22 @@ def guardar_progreso(resultados):
 
 def main():
     if not os.path.exists(MODRINTH_PATH):
-        print(f"Error: No se encuentra la ruta {MODRINTH_PATH}")
+        print(f"Error: La ruta de Modrinth no existe en este sistema.")
         return
 
     mods = encontrar_archivos_mod(MODRINTH_PATH)
     total_encontrados = len(mods)
-    print(f"Se encontraron {total_encontrados} archivos .jar")
+    print(f"Se encontraron {total_encontrados} archivos .jar en las carpetas /mods")
 
     try:
         limite_usuario = int(input("¿Cuántos archivos deseas analizar en esta sesión?: "))
     except ValueError:
-        print("Por favor, ingresa un número válido.")
         return
 
     resultados = []
     analizados_con_exito = 0
     indice_actual = 0
+    borrados_count = 0
 
     with vt.Client(API_KEY) as cliente:
         while analizados_con_exito < limite_usuario and indice_actual < total_encontrados:
@@ -88,25 +89,45 @@ def main():
             
             resultado = analizar_archivo(cliente, ruta_mod)
             
-            # Solo contamos si el archivo se procesó o dio un error definitivo (no si está repetido)
             if resultado.get("estado") != "REINTENTO":
+                veredicto = resultado.get('veredicto', 'ERROR')
+                print(f"    Veredicto: {veredicto}")
+
+                # ELIMINACIÓN EN VIVO
+                if veredicto in ["PELIGROSO", "SOSPECHOSO"]:
+                    print(f"\n⚠️ AMENAZA DETECTADA: {resultado['archivo']}")
+                    confirmar = input(f"    ¿Eliminar este mod de la carpeta de instancia? (s/n): ")
+                    
+                    if confirmar.lower() == 's':
+                        try:
+                            os.remove(resultado['ruta_completa'])
+                            print("    [ELIMINADO] El archivo ya no está en el disco.")
+                            resultado['borrado_por_usuario'] = True
+                            borrados_count += 1
+                        except Exception as e:
+                            print(f"    [ERROR] No se pudo borrar: {e}")
+                    else:
+                        print("    [CONSERVADO] El archivo sigue en su carpeta.")
+                        resultado['borrado_por_usuario'] = False
+
                 resultados.append(resultado)
                 analizados_con_exito += 1
                 guardar_progreso(resultados)
-                
-                veredicto = resultado.get('veredicto', 'ERROR')
-                if veredicto != "ERROR":
-                    print(f"    Veredicto: {veredicto}")
             
             indice_actual += 1
 
-            # Pausa de seguridad si aún faltan archivos por procesar
             if analizados_con_exito < limite_usuario and indice_actual < total_encontrados:
-                print("    Esperando 25s para el próximo archivo...")
+                print("    Esperando 25s por límite de API...")
                 time.sleep(25)
 
-    print(f"\nSesión finalizada. Se procesaron {analizados_con_exito} archivos.")
-    print("Resultados guardados en resultados.json")
+    # RESUMEN FINAL POR CONSOLA
+    print("\n" + "="*30)
+    print("       RESUMEN DE SESIÓN")
+    print("="*30)
+    print(f"  Analizados: {analizados_con_exito}")
+    print(f"  Borrados:   {borrados_count}")
+    print(f"  Limpios:    {len([r for r in resultados if r.get('veredicto') == 'LIMPIO'])}")
+    print("="*30)
 
 if __name__ == "__main__":
     main()
