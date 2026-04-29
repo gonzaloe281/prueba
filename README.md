@@ -28,8 +28,8 @@ Antes de empezar, asegúrate de tener instalado:
 Instalar dependencias:
 Este proyecto utiliza la librería oficial vt-py. Instálala usando pip:
 
-    ```pip install vt-py
-    ```
+   ```pip install vt-py
+   ```
 
 ⚙️ Configuración
 
@@ -39,23 +39,24 @@ Crea el archivo config.py.
 
 Copia y pega el siguiente código, reemplazando los valores con los tuyos:
 Python
-    ```# config.py - Tu configuración personal
+   ```# config.py - Tu configuración personal
 
 API_KEY = "TU_API_KEY_AQUI"
 
 # Ruta donde Modrinth guarda las instancias (ajusta según tu usuario)
 
 MODRINTH_PATH = r"C:\Users\TU_USUARIO\AppData\Roaming\ModrinthApp\profiles"
-```
-⚠️ IMPORTANTE: Nunca compartas tu config.py ni lo subas a GitHub, ya que contiene tu API Key privada. El archivo .gitignore de este repo ya está configurado para ignorarlo.
+   ```
+⚠️ IMPORTANTE: Nunca compartas tu config.py ni lo subas a GitHub, ya que contiene tu API Key privada. 
+El archivo .gitignore de este repo ya está configurado para ignorarlo.
 
 🚀 Uso
 
 Ejecuta el script principal:
 
 
-```python scanner.py
-```
+   ```python scanner.py
+   ```
 
 El script te preguntará cuántos archivos deseas analizar en la sesión actual. Al finalizar, verás los detalles en el archivo generado resultados.json.
 📄 Licencia
@@ -66,14 +67,15 @@ Este proyecto es de uso personal. Revisa los términos de servicio de la API de 
 
 ### Pasos adicionales recomendados:
 
-1.  **Crea un archivo `.gitignore`**: Para evitar que por error subas tu clave a GitHub algún día, crea un archivo llamado `.gitignore` (literalmente así, empieza con un punto) en la misma carpeta y escribe esto adentro:
+1.  **Crea un archivo `.gitignore`**: Para evitar que por error subas tu clave a GitHub algún día, crea un archivo llamado
+ `.gitignore` (literalmente así, empieza con un punto) en la misma carpeta y escribe esto adentro:
 
-    ```text
+   ```text
     config.py
     resultados.json
     __pycache__/
     *.pyc
-    ```
+   ```
 
     Esto le dice a GitHub: "Ignora mi clave y mis resultados personales".
 
