@@ -21,8 +21,8 @@ Antes de empezar, asegúrate de tener instalado:
 1. **Clonar el repositorio:**
 
    ```bash
-   git clone [https://github.com/tu-usuario/nombre-del-repo.git](https://github.com/tu-usuario/nombre-del-repo.git)
-   cd nombre-del-repo
+   gh repo clone gonzaloe281/prueba
+   cd prueba
 
     Instalar dependencias:
     Este proyecto utiliza la librería oficial vt-py. Instálala usando pip:
