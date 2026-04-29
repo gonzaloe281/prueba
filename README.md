@@ -140,6 +140,7 @@ Al terminar genera el archivo `config.py` automáticamente con todo configurado.
 | **GDLauncher**     | `C:\Users\TU_USUARIO\AppData\Roaming\gdlauncher_next\data\instances` |
 
 > ⚠️ **IMPORTANTE 1:** Nunca compartas tu `config.py` ni lo subas a GitHub, ya que contiene tu API Key privada. El archivo `.gitignore` de este repositorio ya está configurado para ignorarlo automáticamente.
+
 > ⚠️ **IMPORTANTE 2:** Esta APP no comparte datos privados de ningún tipo, sean API_KEY, directorios de archivos, o resultados de escaneos conmigo o con terceros, solamente lo basico para que haya comunicacion entre tu PC y VirusTotal (Podes auditar el codigo sin problema, lo que se ve es lo que se ejecuta, sube el archivo y VT devuelve el resultado).
 
 ---
