@@ -5,7 +5,7 @@ import time
 import vt
 import hashlib
 from datetime import datetime, timedelta
-from config import API_KEY, MODRINTH_PATH
+from config import API_KEY, INSTANCES_PATH
 
 def calcular_hash(ruta_archivo):
     """Genera huella SHA-256 leyendo en bloques para optimizar RAM."""
@@ -151,9 +151,9 @@ def procesar_escaneo(cliente, lista_mods, nombre_instancia, db_actual):
 
 def main():
     while True:
-        if not os.path.exists(MODRINTH_PATH): break
+        if not os.path.exists(INSTANCES_PATH): break
         db_total = cargar_base_datos()
-        mapa = encontrar_instancias_y_mods(MODRINTH_PATH)
+        mapa = encontrar_instancias_y_mods(INSTANCES_PATH)
 
         print("\n=== MENÚ PRINCIPAL (ModScanner HASH-DB) ===")
         nombres = list(mapa.keys())

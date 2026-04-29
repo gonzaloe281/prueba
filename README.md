@@ -1,12 +1,12 @@
 # ModScanner VT 🛡️
 
-Este script de Python permite escanear de forma automática todos los archivos `.jar` (mods) de tus instancias de Modrinth utilizando la API de VirusTotal. Está diseñado para funcionar con cuentas gratuitas, respetando los límites de velocidad de la API.
+Este script de Python permite escanear de forma automática todos los archivos `.jar` (mods) de cualquier launcher de Minecraft utilizando la API de VirusTotal. Compatible con Modrinth, CurseForge, Prism Launcher, ATLauncher y cualquier otro launcher que organice los mods en subcarpetas `mods/`. Está diseñado para funcionar con cuentas gratuitas, respetando los límites de velocidad de la API.
 
 ---
 
 ## 🚀 Características
 
-- 🔍 **Detección de mods:** Encuentra automáticamente todas las instancias de Modrinth instaladas en tu PC y lista los archivos `.jar` dentro de cada una. No hace falta indicarle rutas manualmente más allá de la carpeta base configurada en `config.py`.
+- 🔍 **Detección de mods:** Encuentra automáticamente todas las instancias de tu launcher de Minecraft y lista los archivos `.jar` dentro de cada una. Compatible con cualquier launcher que organice los mods en subcarpetas `mods/`. No hace falta indicarle rutas manualmente más allá de la carpeta base configurada en `config.py`.
 
 - 🗂️ **Menú interactivo:** Al ejecutar el programa aparece un menú donde podés elegir qué instancia analizar, y si querés analizar todos los mods nuevos de esa instancia o un mod específico de la lista. Esto evita tener que analizar todo cada vez que agregás un mod nuevo.
 
@@ -119,9 +119,20 @@ Para que el script funcione necesitás crear un archivo llamado `config.py` en l
 
 API_KEY = "TU_API_KEY_AQUI"
 
-# Ruta donde Modrinth guarda las instancias (ajusta según tu usuario)
-MODRINTH_PATH = r"C:\Users\TU_USUARIO\AppData\Roaming\ModrinthApp\profiles"
+# Ruta donde tu launcher guarda las instancias de Minecraft
+# Reemplazá con la ruta correspondiente a tu launcher:
+INSTANCES_PATH = r"C:\Users\TU_USUARIO\AppData\Roaming\ModrinthApp\profiles"
 ```
+
+**Rutas según launcher:**
+
+| Launcher           | Ruta por defecto                                                     |
+| ------------------ | -------------------------------------------------------------------- |
+| **Modrinth**       | `C:\Users\TU_USUARIO\AppData\Roaming\ModrinthApp\profiles`           |
+| **CurseForge**     | `C:\Users\TU_USUARIO\curseforge\minecraft\Instances`                 |
+| **Prism Launcher** | `C:\Users\TU_USUARIO\AppData\Roaming\PrismLauncher\instances`        |
+| **ATLauncher**     | `C:\Users\TU_USUARIO\ATLauncher\instances`                           |
+| **GDLauncher**     | `C:\Users\TU_USUARIO\AppData\Roaming\gdlauncher_next\data\instances` |
 
 > ⚠️ **IMPORTANTE:** Nunca compartas tu `config.py` ni lo subas a GitHub, ya que contiene tu API Key privada. El archivo `.gitignore` de este repositorio ya está configurado para ignorarlo automáticamente.
 
