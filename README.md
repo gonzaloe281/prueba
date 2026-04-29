@@ -55,9 +55,8 @@ El archivo .gitignore de este repo ya está configurado para ignorarlo.
 🚀 Uso
 
 Ejecuta el script principal:
-
-
-   ```python scanner.py
+   ```
+   python scanner.py
    ```
 
 El script te preguntará cuántos archivos deseas analizar en la sesión actual. Al finalizar, verás los detalles en el archivo generado resultados.json.
