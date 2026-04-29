@@ -18,7 +18,7 @@ Antes de empezar, asegúrate de tener instalado:
 
 ## 🛠️ 1. Instalación
 
-**Clonar el repositorio:**
+**A. Clonar el repositorio:**
 
    ```
    gh repo clone gonzaloe281/prueba
@@ -26,14 +26,14 @@ Antes de empezar, asegúrate de tener instalado:
    ```
 
 
-Instalar dependencias:
+**B.Instalar dependencias:**
 Este proyecto utiliza la librería oficial vt-py. Instálala usando pip:
 
    ```
    pip install vt-py
    ```
 
-⚙️ 2. Configuración
+## ⚙️ 2. Configuración
 
 Para que el script funcione, debes crear un archivo llamado config.py en la carpeta raíz del proyecto.
 
@@ -53,7 +53,7 @@ MODRINTH_PATH = r"C:\Users\TU_USUARIO\AppData\Roaming\ModrinthApp\profiles"
 ⚠️ IMPORTANTE: Nunca compartas tu config.py ni lo subas a GitHub, ya que contiene tu API Key privada. 
 El archivo .gitignore de este repo ya está configurado para ignorarlo.
 
-🚀 3. Uso
+## 🚀 3. Uso
 
 Ejecuta el script principal:
    ```
