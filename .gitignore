@@ -1,5 +1,20 @@
+# --- Seguridad ---
 config.py
+
+# --- Datos Locales ---
 resultados.json
-__pycache__
-.vscode
+
+# --- Python ---
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# --- VS Code ---
+.vscode/
+
+# --- Pruebas y Temporales (PyInstaller) ---
 scanner2.py
+build/
+dist/
+*.spec
