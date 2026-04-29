@@ -24,7 +24,7 @@ Este script de Python permite escanear de forma automática todos los archivos `
 
 ## 📋 Requisitos Previos
 
-Si es la primera vez que trabajás con Python, seguí estos pasos antes de continuar. Si ya tenés todo instalado, podés saltarte directo a [Instalación](#instalación).
+Si es la primera vez que trabajás con Python, seguí estos pasos antes de continuar. Si ya tenés todo instalado, podés saltarte directo a [Instalación](#-instalación).
 
 ### 🐍 1. Python
 
