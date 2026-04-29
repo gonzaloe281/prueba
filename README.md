@@ -82,6 +82,7 @@ Este proyecto es de uso personal. Revisa los términos de servicio de la API de 
    ```
 
 Esto le dice a GitHub: "Ignora mi clave y mis resultados personales".
+
 ---
 
 ¿Te gustaría que agreguemos alguna sección más, como una tabla de cómo leer los resultados del JSON? Posiblemente en el futuro conmbine este codigo con DJango para hacerlo bonito,
