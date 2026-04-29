@@ -2,3 +2,4 @@ config.py
 resultados.json
 __pycache__
 .vscode
+scanner2.py

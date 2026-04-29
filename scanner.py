@@ -1,133 +1,190 @@
-# scanner.py - Escaneador de mods con VirusTotal y eliminación de amenazas
+# scanner.py - Versión Final HASH-DB: Rendimiento, Enlaces VT y Veredictos S/P
 import os
 import json
 import time
 import vt
-import sys
+import hashlib
+from datetime import datetime, timedelta
 from config import API_KEY, MODRINTH_PATH
 
-def encontrar_archivos_mod(ruta_base):
-    archivos = []
-    # os.walk recorre solo lo que está dentro de MODRINTH_PATH
-    for carpeta_raiz, subcarpetas, archivos_en_carpeta in os.walk(ruta_base):
-        if os.path.basename(carpeta_raiz) == "mods":
-            for nombre_archivo in archivos_en_carpeta:
-                if nombre_archivo.endswith(".jar"):
-                    ruta_completa = os.path.join(carpeta_raiz, nombre_archivo)
-                    archivos.append(ruta_completa)
-    return archivos
+def calcular_hash(ruta_archivo):
+    """Genera huella SHA-256 leyendo en bloques para optimizar RAM."""
+    sha256_hash = hashlib.sha256()
+    try:
+        with open(ruta_archivo, "rb") as f:
+            for bloque in iter(lambda: f.read(4096), b""):
+                sha256_hash.update(bloque)
+        return sha256_hash.hexdigest()
+    except:
+        return None
 
-def analizar_archivo(cliente_vt, ruta_archivo):
+def limpiar_y_reciclar_db(db_actual):
+    """
+    Mantenimiento Inteligente:
+    - 90 días: Borra 'detalles' técnicos pesados.
+    - SIEMPRE conserva: Hash, Archivo, Fecha, Veredicto (S/P) y Link VT.
+    """
+    hoy = datetime.now()
+    periodo_reciclaje = timedelta(days=90)
+    db_procesada = []
+    hubo_cambios = False
+    
+    # Identificamos qué archivos ya tienen Hash para limpiar duplicados viejos (Migración)
+    rutas_con_hash = {item.get("ultima_ruta_conocida") for item in db_actual if "hash" in item}
+
+    for item in db_actual:
+        # 1. MIGRACIÓN: Elimina basura si ya existe el mismo archivo con Hash
+        if "hash" not in item:
+            ruta = item.get("ultima_ruta_conocida") or item.get("ruta_completa")
+            if ruta in rutas_con_hash:
+                hubo_cambios = True; continue
+        
+        # 2. RECICLAJE TRIMESTRAL: Poda lo pesado, deja lo vital
+        try:
+            fecha_str = item.get("fecha_escaneo") or item.get("fecha", "2000-01-01 00:00:00")
+            fecha_item = datetime.strptime(fecha_str, "%Y-%m-%d %H:%M:%S")
+            
+            if hoy - fecha_item > periodo_reciclaje:
+                if "detalles" in item: # Solo si aún tiene los datos pesados
+                    item = {
+                        "hash": item.get("hash"),
+                        "archivo_original": item.get("archivo_original", "Desconocido"),
+                        "veredicto": item.get("veredicto", "S"),
+                        "link_vt": item.get("link_vt", f"https://www.virustotal.com/gui/file/{item.get('hash')}/detection"),
+                        "fecha_escaneo": fecha_str
+                    }
+                    hubo_cambios = True
+        except: pass
+            
+        db_procesada.append(item)
+    return db_procesada, hubo_cambios
+
+def encontrar_instancias_y_mods(ruta_base):
+    instancias = {}
+    try:
+        for item in os.listdir(ruta_base):
+            ruta_instancia = os.path.join(ruta_base, item)
+            if os.path.isdir(ruta_instancia):
+                ruta_mods = os.path.join(ruta_instancia, "mods")
+                if os.path.exists(ruta_mods) and os.path.isdir(ruta_mods):
+                    mods = [os.path.join(ruta_mods, f) for f in os.listdir(ruta_mods) if f.endswith(".jar")]
+                    if mods: instancias[item] = sorted(mods)
+    except: pass
+    return instancias
+
+def analizar_archivo(cliente_vt, ruta_archivo, hash_archivo):
     nombre = os.path.basename(ruta_archivo)
-    instancia = os.path.basename(os.path.dirname(os.path.dirname(ruta_archivo)))
-    print(f"  Analizando: {nombre}")
+    print(f"\n  🔍 Analizando: {nombre}")
     try:
         with open(ruta_archivo, "rb") as f:
             analisis = cliente_vt.scan_file(f)
         
-        tiempo_espera = 0
+        t = 0
         while True:
-            resultado = cliente_vt.get_object(f"/analyses/{analisis.id}")
-            if resultado.status == "completed":
-                stats = resultado.stats
-                veredicto = "LIMPIO"
-                if stats.get("malicious", 0) > 0:
-                    veredicto = "PELIGROSO"
-                elif stats.get("suspicious", 0) > 0:
-                    veredicto = "SOSPECHOSO"
-                
+            res = cliente_vt.get_object(f"/analyses/{analisis.id}")
+            if res.status == "completed":
+                stats = res.stats
+                # Veredicto: P (Peligro), S (Seguro)
+                veredicto = "P" if stats.get("malicious", 0) > 0 or stats.get("suspicious", 0) > 0 else "S"
                 return {
-                    "instancia": instancia,
-                    "archivo": nombre,
-                    "ruta_completa": ruta_archivo,
+                    "hash": hash_archivo,
+                    "archivo_original": nombre,
+                    "ultima_ruta_conocida": ruta_archivo,
                     "veredicto": veredicto,
+                    "link_vt": f"https://www.virustotal.com/gui/file/{hash_archivo}/detection",
                     "detalles": dict(stats),
-                    "estado": "OK"
+                    "estado": "OK",
+                    "fecha_escaneo": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 }
-            
-            if tiempo_espera > 300:
-                return {"instancia": instancia, "archivo": nombre, "error": "Timeout", "estado": "ERROR"}
-            
-            print(f"    Esperando resultado... ({tiempo_espera}s)")
-            time.sleep(15)
-            tiempo_espera += 15
+            if t > 300: return {"archivo": nombre, "error": "Timeout"}
+            time.sleep(15); t += 15
+    except Exception as e: return {"archivo": nombre, "error": str(e)}
 
-    except vt.error.APIError as e:
-        if "AlreadySubmittedError" in str(e):
-            return {"instancia": instancia, "archivo": nombre, "error": "AlreadySubmittedError", "estado": "REINTENTO"}
-        return {"instancia": instancia, "archivo": nombre, "error": str(e), "estado": "ERROR"}
-    except Exception as e:
-        return {"instancia": instancia, "archivo": nombre, "error": str(e), "estado": "ERROR"}
+def cargar_base_datos():
+    if not os.path.exists("resultados.json"): return []
+    try:
+        with open("resultados.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+        data_limpia, cambios = limpiar_y_reciclar_db(data)
+        if cambios:
+            print("[SISTEMA] Aplicando reciclaje y limpieza trimestral...")
+            guardar_base_datos(data_limpia)
+        return data_limpia
+    except: return []
 
-def guardar_progreso(resultados):
+def guardar_base_datos(datos):
     with open("resultados.json", "w", encoding="utf-8") as f:
-        json.dump(resultados, f, ensure_ascii=False, indent=2)
+        json.dump(datos, f, ensure_ascii=False, indent=2)
+
+def procesar_escaneo(cliente, lista_mods, nombre_instancia, db_actual):
+    borrados = 0
+    hashes_conocidos = {item["hash"] for item in db_actual if "hash" in item}
+
+    for i, ruta_mod in enumerate(lista_mods):
+        h = calcular_hash(ruta_mod)
+        if not h or h in hashes_conocidos:
+            if h: print(f"  [SKIP] {os.path.basename(ruta_mod)} ya analizado.")
+            continue
+
+        print(f"\n[Archivo {i+1}/{len(lista_mods)}]")
+        res = analizar_archivo(cliente, ruta_mod, h)
+        res["ultima_instancia"] = nombre_instancia
+        
+        if res.get("estado") == "OK":
+            status_txt = "⚠️ PELIGROSO" if res['veredicto'] == "P" else "✅ SEGURO"
+            print(f"    Veredicto: {status_txt} | Link: {res['link_vt']}")
+
+            if res['veredicto'] == "P":
+                if input(f"    ¿Eliminar amenaza? (s/n): ").lower() == 's':
+                    try: 
+                        os.remove(ruta_mod); print("    ✅ Borrado."); borrados += 1
+                    except: print("    ❌ Error al borrar.")
+            
+            db_actual.append(res)
+            hashes_conocidos.add(h)
+            guardar_base_datos(db_actual)
+
+        if i < len(lista_mods) - 1:
+            print("    Esperando 25s (API Limit)...")
+            time.sleep(25)
+    print(f"\n--- Sesión finalizada. Borrados: {borrados} ---")
 
 def main():
-    if not os.path.exists(MODRINTH_PATH):
-        print(f"Error: La ruta de Modrinth no existe en este sistema.")
-        return
+    while True:
+        if not os.path.exists(MODRINTH_PATH): break
+        db_total = cargar_base_datos()
+        mapa = encontrar_instancias_y_mods(MODRINTH_PATH)
 
-    mods = encontrar_archivos_mod(MODRINTH_PATH)
-    total_encontrados = len(mods)
-    print(f"Se encontraron {total_encontrados} archivos .jar en las carpetas /mods")
+        print("\n=== MENÚ PRINCIPAL (ModScanner HASH-DB) ===")
+        nombres = list(mapa.keys())
+        for i, nombre in enumerate(nombres, 1):
+            print(f"{i}. {nombre} ({len(mapa[nombre])} mods)")
+        print("0. SALIR")
 
-    try:
-        limite_usuario = int(input("¿Cuántos archivos deseas analizar en esta sesión?: "))
-    except ValueError:
-        return
+        op_inst = input("\nElija instancia: ")
+        if op_inst == "0": break
+        try:
+            nombre_sel = nombres[int(op_inst) - 1]
+            mods_instancia = mapa[nombre_sel]
+        except: continue
 
-    resultados = []
-    analizados_con_exito = 0
-    indice_actual = 0
-    borrados_count = 0
+        while True:
+            print(f"\n=== MODS EN {nombre_sel} ===")
+            print("1. [ANALIZAR CONTENIDO NUEVO]")
+            for i, ruta in enumerate(mods_instancia, 2):
+                print(f"{i}. {os.path.basename(ruta)}")
+            print("0. VOLVER")
 
-    with vt.Client(API_KEY) as cliente:
-        while analizados_con_exito < limite_usuario and indice_actual < total_encontrados:
-            ruta_mod = mods[indice_actual]
-            print(f"\n[Progreso: {analizados_con_exito + 1}/{limite_usuario}]")
-            
-            resultado = analizar_archivo(cliente, ruta_mod)
-            
-            if resultado.get("estado") != "REINTENTO":
-                veredicto = resultado.get('veredicto', 'ERROR')
-                print(f"    Veredicto: {veredicto}")
-
-                # ELIMINACIÓN EN VIVO
-                if veredicto in ["PELIGROSO", "SOSPECHOSO"]:
-                    print(f"\n⚠️ AMENAZA DETECTADA: {resultado['archivo']}")
-                    confirmar = input(f"    ¿Eliminar este mod de la carpeta de instancia? (s/n): ")
-                    
-                    if confirmar.lower() == 's':
-                        try:
-                            os.remove(resultado['ruta_completa'])
-                            print("    [ELIMINADO] El archivo ya no está en el disco.")
-                            resultado['borrado_por_usuario'] = True
-                            borrados_count += 1
-                        except Exception as e:
-                            print(f"    [ERROR] No se pudo borrar: {e}")
-                    else:
-                        print("    [CONSERVADO] El archivo sigue en su carpeta.")
-                        resultado['borrado_por_usuario'] = False
-
-                resultados.append(resultado)
-                analizados_con_exito += 1
-                guardar_progreso(resultados)
-            
-            indice_actual += 1
-
-            if analizados_con_exito < limite_usuario and indice_actual < total_encontrados:
-                print("    Esperando 25s por límite de API...")
-                time.sleep(25)
-
-    # RESUMEN FINAL POR CONSOLA
-    print("\n" + "="*30)
-    print("       RESUMEN DE SESIÓN")
-    print("="*30)
-    print(f"  Analizados: {analizados_con_exito}")
-    print(f"  Borrados:   {borrados_count}")
-    print(f"  Limpios:    {len([r for r in resultados if r.get('veredicto') == 'LIMPIO'])}")
-    print("="*30)
+            op_mod = input("\nSeleccione: ")
+            if op_mod == "0": break
+            with vt.Client(API_KEY) as cliente:
+                if op_mod == "1": procesar_escaneo(cliente, mods_instancia, nombre_sel, db_total)
+                else:
+                    try:
+                        idx = int(op_mod) - 2
+                        procesar_escaneo(cliente, [mods_instancia[idx]], nombre_sel, db_total)
+                    except: continue
+            input("\nPresiona Enter para continuar...")
 
 if __name__ == "__main__":
     main()
