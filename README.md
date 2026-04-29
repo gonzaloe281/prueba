@@ -24,12 +24,12 @@ Antes de empezar, asegúrate de tener instalado:
    cd prueba
    ```
 
-````
+
 Instalar dependencias:
 Este proyecto utiliza la librería oficial vt-py. Instálala usando pip:
 
     ```pip install vt-py
-````
+    ```
 
 ⚙️ Configuración
 
@@ -38,24 +38,21 @@ Para que el script funcione, debes crear un archivo llamado config.py en la carp
 Crea el archivo config.py.
 
 Copia y pega el siguiente código, reemplazando los valores con los tuyos:
-
-    ```Python
-
-# config.py - Tu configuración personal
+Python
+    ```# config.py - Tu configuración personal
 
 API_KEY = "TU_API_KEY_AQUI"
 
 # Ruta donde Modrinth guarda las instancias (ajusta según tu usuario)
 
 MODRINTH_PATH = r"C:\Users\TU_USUARIO\AppData\Roaming\ModrinthApp\profiles"
-
-````
+```
 ⚠️ IMPORTANTE: Nunca compartas tu config.py ni lo subas a GitHub, ya que contiene tu API Key privada. El archivo .gitignore de este repo ya está configurado para ignorarlo.
 
 🚀 Uso
 
 Ejecuta el script principal:
-Bash
+
 
 ```python scanner.py
 ```
