@@ -20,7 +20,8 @@ Antes de empezar, asegúrate de tener instalado:
 
 1. **Clonar el repositorio:**
 
-   ```gh repo clone gonzaloe281/prueba
+   ```
+   gh repo clone gonzaloe281/prueba
    cd prueba
    ```
 
@@ -28,7 +29,8 @@ Antes de empezar, asegúrate de tener instalado:
 Instalar dependencias:
 Este proyecto utiliza la librería oficial vt-py. Instálala usando pip:
 
-   ```pip install vt-py
+   ```
+   pip install vt-py
    ```
 
 ⚙️ Configuración
@@ -77,8 +79,8 @@ Este proyecto es de uso personal. Revisa los términos de servicio de la API de 
     *.pyc
    ```
 
-    Esto le dice a GitHub: "Ignora mi clave y mis resultados personales".
+Esto le dice a GitHub: "Ignora mi clave y mis resultados personales".
 
 ¿Te gustaría que agreguemos alguna sección más, como una tabla de cómo leer los resultados del JSON? Posiblemente en el futuro conmbine este codigo con DJango para hacerlo bonito,
 si descubro como tirar los resultados del JSON a un HTML en principio, y si puedo tambien que se ejecute todo desde un navegador...
-````
+
