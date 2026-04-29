@@ -104,27 +104,32 @@ Este proyecto utiliza la librería oficial `vt-py`. Instalala usando pip:
 pip install vt-py
 ```
 
+**C. Configurar el proyecto:**
+
+```
+python setup.py
+```
+
 ---
 
 ## ⚙️ Configuración
 
-Para que el script funcione necesitás crear un archivo llamado `config.py` en la carpeta raíz del proyecto.
+Una vez clonado el repo, ejecutá el asistente de configuración incluido:
 
-**1.** Creá el archivo `config.py`
-
-**2.** Copiá y pegá el siguiente contenido, reemplazando los valores con los tuyos:
-
-```python
-# config.py - Tu configuración personal
-
-API_KEY = "TU_API_KEY_AQUI"
-
-# Ruta donde tu launcher guarda las instancias de Minecraft
-# Reemplazá con la ruta correspondiente a tu launcher:
-INSTANCES_PATH = r"C:\Users\TU_USUARIO\AppData\Roaming\ModrinthApp\profiles"
+```
+python setup.py
 ```
 
-**Rutas según launcher:**
+El asistente va a pedirte dos cosas:
+
+- 🔑 Tu **API Key** de VirusTotal
+- 📁 La **ruta** donde tu launcher guarda las instancias
+
+Al terminar genera el archivo `config.py` automáticamente con todo configurado. No hace falta crearlo ni editarlo a mano.
+
+> ℹ️ Si en algún momento necesitás cambiar la configuración, simplemente volvé a ejecutar `python setup.py` y sobreescribí el archivo existente.
+
+**Rutas de referencia por launcher:**
 
 | Launcher           | Ruta por defecto                                                     |
 | ------------------ | -------------------------------------------------------------------- |
@@ -134,7 +139,8 @@ INSTANCES_PATH = r"C:\Users\TU_USUARIO\AppData\Roaming\ModrinthApp\profiles"
 | **ATLauncher**     | `C:\Users\TU_USUARIO\ATLauncher\instances`                           |
 | **GDLauncher**     | `C:\Users\TU_USUARIO\AppData\Roaming\gdlauncher_next\data\instances` |
 
-> ⚠️ **IMPORTANTE:** Nunca compartas tu `config.py` ni lo subas a GitHub, ya que contiene tu API Key privada. El archivo `.gitignore` de este repositorio ya está configurado para ignorarlo automáticamente.
+> ⚠️ **IMPORTANTE 1:** Nunca compartas tu `config.py` ni lo subas a GitHub, ya que contiene tu API Key privada. El archivo `.gitignore` de este repositorio ya está configurado para ignorarlo automáticamente.
+> ⚠️ **IMPORTANTE 2:** Esta APP no comparte datos privados de ningún tipo, sean API_KEY, directorios de archivos, o resultados de escaneos conmigo o con terceros, solamente lo basico para que haya comunicacion entre tu PC y VirusTotal (Podes auditar el codigo sin problema, lo que se ve es lo que se ejecuta, sube el archivo y VT devuelve el resultado).
 
 ---
 
