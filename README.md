@@ -147,13 +147,35 @@ Al terminar genera el archivo `config.py` automáticamente con todo configurado.
 
 ## ▶️ Uso
 
-Ejecutá el script principal desde la terminal:
+El proyecto tiene dos modos de uso, podés combinarlos según necesites:
+
+---
+
+### 🔎 Escaneo manual
+
+Analizá tus mods existentes en cualquier momento desde un menú interactivo:
 
 ```
 python scanner.py
 ```
 
-El programa va a mostrar un menú interactivo donde podés elegir qué instancia y qué mods analizar. Al finalizar cada análisis, los resultados quedan guardados en `resultados.json`.
+El programa muestra un menú donde elegís qué instancia y qué mods analizar. Los resultados quedan guardados en `resultados.json`.
+
+---
+
+### 👁️ Monitor en tiempo real
+
+Vigilá la carpeta de mods en segundo plano. Cada vez que Modrinth (o cualquier launcher) descarga un mod nuevo, se analiza automáticamente y recibís una notificación de Windows con el resultado:
+
+```
+python monitor.py
+```
+
+- Los mods nuevos se encolan y se analizan uno por uno respetando el límite de la API
+- Los resultados se guardan en el mismo `resultados.json` que el escáner manual
+- Si un mod ya fue analizado antes, se saltea automáticamente
+- Para detenerlo presioná `Ctrl+C`
+- Las actividades quedan registradas en `monitor.log`
 
 ---
 

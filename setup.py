@@ -14,17 +14,14 @@ LAUNCHERS = {
 }
 
 def instalar_dependencias():
-    """Paso 1: Instala las librerías del requirements.txt automáticamente."""
+    """Paso 1: Instala las librerías necesarias automáticamente."""
     print("\n📦 PASO 1: Verificando e instalando dependencias...")
-    if os.path.exists("requirements.txt"):
-        try:
-            # -m pip install asegura que use el pip del entorno actual (venv o global)
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "-r", "requirements.txt"])
-            print("   ✅ Dependencias listas.")
-        except Exception as e:
-            print(f"   ❌ Error instalando dependencias: {e}")
-    else:
-        print("   ⚠️ No se encontró requirements.txt. Saltando este paso.")
+    dependencias = ["vt-py", "watchdog", "plyer"]
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "-q"] + dependencias)
+        print("   ✅ Dependencias listas.")
+    except Exception as e:
+        print(f"   ❌ Error instalando dependencias: {e}")
 
 def pedir_datos():
     """Paso 2: Recopila API Key y Ruta."""
@@ -55,14 +52,30 @@ def generar_config(api_key, ruta):
 
 def ejecutar_scanner():
     """Paso 4: Ejecución inmediata si el usuario quiere."""
-    print("\n" + "="*50)
-    confirmar = input("🚀 ¿Querés iniciar el escaneo ahora? (s/n): ").strip().lower()
-    if confirmar == 's':
+    print("\n" + "=" * 50)
+    print("¿Qué querés hacer ahora?")
+    print("  1. Escanear mods manualmente (scanner.py)")
+    print("  2. Activar monitor en tiempo real (monitor.py)")
+    print("  3. Salir por ahora")
+    opcion = input("\n  Elegí una opción: ").strip()
+
+    if opcion == "1":
         if os.path.exists("scanner.py"):
             print("\n--- Iniciando ModScanner VT ---\n")
             subprocess.run([sys.executable, "scanner.py"])
         else:
             print("❌ No se encontró scanner.py en esta carpeta.")
+    elif opcion == "2":
+        if os.path.exists("monitor.py"):
+            print("\n--- Iniciando Monitor en tiempo real ---")
+            print("   Presioná Ctrl+C para detenerlo cuando quieras.\n")
+            subprocess.run([sys.executable, "monitor.py"])
+        else:
+            print("❌ No se encontró monitor.py en esta carpeta.")
+    else:
+        print("\n✅ Configuración lista. Podés ejecutar cuando quieras:")
+        print("   python scanner.py   — escaneo manual")
+        print("   python monitor.py   — monitor en tiempo real")
 
 def main():
     print("=" * 50)

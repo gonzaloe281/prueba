@@ -18,3 +18,5 @@ scanner2.py
 build/
 dist/
 *.spec
+# --- Monitor ---
+monitor.log
